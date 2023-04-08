@@ -1,0 +1,16 @@
+<h4>Opsss...an internal server error occurred...</h4>
+
+<ng-container *ngIf="error">
+  <h5 class="text-danger">Error: {{error.message}}</h5>
+  <p class="font-weight-bold">Note: If you are seeing this then it is probably not a frontend issue</p>
+  <p>what do next?</p>
+  <ol>
+    <li>Open Chrome dev tools and then check the failing request in the network tab</li>
+    <li>Examine the request URL - what API endpoint are you requesting?</li>
+    <li>Reproduce the problem in Postman to check if this is an API issue</li>
+  </ol>
+  <p style="font-weight: bold;">If it's an API issue, you can find out below the cause of it:</p>
+  <code class="mt-5" style="background-color: whitesmoke;">
+    {{error.details}}
+  </code>
+</ng-container>

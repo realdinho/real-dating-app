@@ -26,7 +26,7 @@ export class NavComponent implements OnInit {
       next: _ => { // _ or () or response denote that we do not have any parameter
         this.router.navigateByUrl('/members');
       },
-      error: error => this.toastr.error(error.error)    
+      // error: error => this.toastr.error(error.error)    
     });
   }
 
