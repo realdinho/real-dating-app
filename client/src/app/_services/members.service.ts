@@ -9,7 +9,9 @@ import { Member } from '../_models/member';
 export class MembersService {
   baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient
+  ) { }
 
   getMembers() {
     return this.http.get<Member[]>(this.baseUrl + 'users', this.getHttpOptions());
