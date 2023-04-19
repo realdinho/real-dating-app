@@ -3,6 +3,7 @@ using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,11 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
+        
         public AccountController(DataContext context, ITokenService tokenService)
         {
+            _context = context;
             _tokenService = tokenService;
-            _context = context;            
         }
 
         [HttpPost("register")] // POST: api/account/register
@@ -39,16 +41,19 @@ namespace API.Controllers
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
             };
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(
-                u => u.UserName == loginDTO.Username
-            );
+            var user = await _context.Users
+                .Include(u => u.Photos)
+                .SingleOrDefaultAsync(
+                    u => u.UserName == loginDTO.Username
+                );
 
             if (user == null) return Unauthorized("invalid username");
 
@@ -63,7 +68,8 @@ namespace API.Controllers
             return new UserDTO
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(p => p.IsMain)?.Url
             };
         }
 
