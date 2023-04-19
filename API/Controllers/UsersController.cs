@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -109,5 +108,27 @@ namespace API.Controllers
 
             return BadRequest("We've encountered an error setting the main photo");
         } 
+
+        [HttpDelete("delete-photo/{photoId}")]
+        public async Task<ActionResult> DeletePhoto(int photoId)
+        {
+            var user = await _userRepo.GetUserByUsernameAsync(User.GetUsername());
+            var photo = user.Photos.FirstOrDefault(p => p.Id == photoId);
+
+            if (photo == null) return NotFound();
+            if (photo.IsMain) return BadRequest("You cannot delete your main photo");
+
+            if (photo.PublicId != null)
+            {
+                var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+                if (result.Error != null) return BadRequest(result.Error.Message);
+            }
+
+            user.Photos.Remove(photo);
+
+            if (await _userRepo.SaveAllAsync()) return Ok();
+
+            return BadRequest("We've encountered an error deleting the main photo");
+        }
     }
 }
