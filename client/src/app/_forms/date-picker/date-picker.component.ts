@@ -13,10 +13,12 @@ export class DatePickerComponent implements ControlValueAccessor {
   bsConfig: Partial<BsDatepickerConfig> | undefined;
 
   constructor(@Self() public ngControl: NgControl) {
+    this.ngControl.valueAccessor = this;
+
     this.bsConfig = {
       containerClass: 'theme-red',
       dateInputFormat: 'DD/MM/YYYY'
-    }
+    };
   }
 
   writeValue(obj: any): void {
@@ -29,6 +31,6 @@ export class DatePickerComponent implements ControlValueAccessor {
   }
 
   get control() : FormControl {
-    return this.ngControl.control as FormControl; 
+    return this.ngControl.control as FormControl;
   }
 }
