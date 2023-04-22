@@ -8,6 +8,7 @@ import { NgxGalleryModule } from '@kolkov/ngx-gallery';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { FileUploadModule } from 'ng2-file-upload';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
+import { ButtonsModule } from 'ngx-bootstrap/buttons';
 
 @NgModule({
   declarations: [],
@@ -24,7 +25,8 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
     }),
     FileUploadModule,
     BsDatepickerModule.forRoot(),
-    PaginationModule.forRoot()
+    PaginationModule.forRoot(),
+    ButtonsModule.forRoot(),
   ],
   exports: [
     BsDropdownModule,
@@ -35,6 +37,7 @@ import { PaginationModule } from 'ngx-bootstrap/pagination';
     FileUploadModule,
     BsDatepickerModule,
     PaginationModule,
+    ButtonsModule
   ]
 })
 export class SharedModule { }
