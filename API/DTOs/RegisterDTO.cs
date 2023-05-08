@@ -4,7 +4,7 @@ namespace API.DTOs
 {
     public class RegisterDTO
     {
-        [Required] public string username { get; set; }
+        [Required] public string Username { get; set; }
         [Required] public string KnownAs { get; set; }
         [Required] public string Gender { get; set; }
         [Required] public DateOnly? DateOfBirth { get; set; } // optional to make required work ??
@@ -13,6 +13,6 @@ namespace API.DTOs
 
         [Required]        
         [StringLength(8, MinimumLength = 4)]
-        public string password { get; set; }
+        public string Password { get; set; }
     }
 }

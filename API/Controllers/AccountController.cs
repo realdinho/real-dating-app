@@ -1,10 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,32 +11,28 @@ namespace API.Controllers
 {
     public class AccountController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager;
         
-        public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper)
         {
+            _userManager = userManager;
             _mapper = mapper;
-            _context = context;
             _tokenService = tokenService;
         }
 
         [HttpPost("register")] // POST: api/account/register
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
         {
-            if (await UserExists(registerDTO.username)) return BadRequest("User has been taken!");
+            if (await UserExists(registerDTO.Username)) return BadRequest("User has been taken!");
 
             var user = _mapper.Map<AppUser>(registerDTO);
+            user.UserName = registerDTO.Username.ToLower();
 
-            using var hmac = new HMACSHA512(); // using => it will be disposed automatically 
+            var result = await _userManager.CreateAsync(user, registerDTO.Password);
 
-            user.UserName = registerDTO.username.ToLower();
-            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.password));
-            user.PasswordSalt = hmac.Key;
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            if (!result.Succeeded) return BadRequest(result.Errors);
 
             return new UserDTO
             {
@@ -51,21 +46,15 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _context.Users
+            var user = await _userManager.Users
                 .Include(u => u.Photos)
-                .SingleOrDefaultAsync(
-                    u => u.UserName == loginDTO.Username
-                );
+                .SingleOrDefaultAsync(u => u.UserName == loginDTO.Username);
 
             if (user == null) return Unauthorized("invalid username");
 
-            using var hmac = new HMACSHA512(user.PasswordSalt); // using will make it to be disposed automatically
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
+            var result = await _userManager.CheckPasswordAsync(user, loginDTO.Password);
 
-            for (int i = 0; i < computedHash.Length; i++)
-            {
-                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("invalid password");
-            }
+            if (!result) return Unauthorized("Invalid password");
 
             return new UserDTO
             {
@@ -79,7 +68,7 @@ namespace API.Controllers
 
         private async Task<bool> UserExists(string username)
         {
-            return await _context.Users.AnyAsync(u => u.UserName == username.ToLower());
+            return await _userManager.Users.AnyAsync(u => u.UserName == username.ToLower());
         }
     }
 }
