@@ -42,6 +42,8 @@ try
     await context.Database.MigrateAsync();
     var userManager = services.GetRequiredService<UserManager<AppUser>>();
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+    // await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [Connections]"); // for SQL Database in PROD
+    await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]"); // for SQLite
     await Seed.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
