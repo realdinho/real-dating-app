@@ -9,25 +9,23 @@ namespace API.Controllers
 {
     public class LikesController : BaseApiController
     {
-        private readonly IUserRepository _userRepo;
-        private readonly ILikesRepository _likesRepo;
-        public LikesController(IUserRepository userRepo, ILikesRepository likesRepo)
-        {
-            _likesRepo = likesRepo;
-            _userRepo = userRepo;            
+        private readonly IUnitOfWork _uow;
+        public LikesController(IUnitOfWork uow)
+        {          
+            _uow = uow;
         }
 
         [HttpPost("{username}")]
         public async Task<ActionResult> AddLike(string username)
         {
             var sourceUserId = User.GetUserId();
-            var likedUser = await _userRepo.GetUserByUsernameAsync(username);
-            var sourceUser = await _likesRepo.GetUserWithLikes(sourceUserId);
+            var likedUser = await _uow.UserRepository.GetUserByUsernameAsync(username);
+            var sourceUser = await _uow.LikesRepository.GetUserWithLikes(sourceUserId);
 
             if (likedUser == null) return NotFound();
             if (sourceUser.UserName == username) return BadRequest("you cannot like yourself!");
 
-            var userLike = await _likesRepo.GetUserLike(sourceUserId, likedUser.Id);
+            var userLike = await _uow.LikesRepository.GetUserLike(sourceUserId, likedUser.Id);
 
             userLike = new UserLike
             {
@@ -37,7 +35,7 @@ namespace API.Controllers
 
             sourceUser.LikedUsers.Add(userLike);
 
-            if (await _userRepo.SaveAllAsync()) return Ok();
+            if (await _uow.Complete()) return Ok();
 
             return BadRequest("Failed to like user!");
         }
@@ -46,7 +44,7 @@ namespace API.Controllers
         public async Task<ActionResult<LinkedList<LikeDTO>>> GetUserLikes([FromQuery] LikesParams likesParams)
         {
             likesParams.UserId = User.GetUserId();
-            var users = await _likesRepo.GetUserLikes(likesParams);
+            var users = await _uow.LikesRepository.GetUserLikes(likesParams);
 
             Response.AddPaginationHeader(
                 new PaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages)
