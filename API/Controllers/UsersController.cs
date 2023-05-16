@@ -49,7 +49,11 @@ namespace API.Controllers
         [HttpGet("{username}")]
         public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
-            return await _uow.UserRepository.GetMemberAsync(username);
+            var currentUsername = User.GetUsername();
+            return await _uow.UserRepository.GetMemberAsync(
+                username,
+                isCurrentUser: currentUsername == username
+            );
         }
 
         [HttpPut]
@@ -83,8 +87,6 @@ namespace API.Controllers
                 PublicId = result.PublicId  
             };
 
-            if (user.Photos.Count == 0) photo.IsMain = true;
-
             user.Photos.Add(photo);
 
             if (await _uow.Complete())
@@ -96,7 +98,7 @@ namespace API.Controllers
                 );
             };
 
-            return BadRequest("We have encountered a problem");
+            return BadRequest("We have encountered a problem adding the photo.");
         }
 
         [HttpPut("set-main-photo/{photoId}")]
@@ -126,7 +128,7 @@ namespace API.Controllers
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
             var user = await _uow.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var photo = user.Photos.FirstOrDefault(p => p.Id == photoId);
+            var photo = await _uow.PhotoRepository.GetPhotoById(photoId);
 
             if (photo == null) return NotFound();
             if (photo.IsMain) return BadRequest("You cannot delete your main photo");
