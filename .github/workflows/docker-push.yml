@@ -1,4 +1,4 @@
-name: ci
+name: docker-push
 
 on:
   workflow_dispatch:
@@ -10,6 +10,10 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       -
