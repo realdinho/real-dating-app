@@ -1,0 +1,22 @@
+# fly.toml app configuration file generated for realdatingapp on 2023-05-17T13:46:03+08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "realdatingapp"
+primary_region = "hkg"
+
+[build]
+  image = "realdinho/datingapp:latest"
+
+[env]
+    ASPNETCORE_URLS="http://+:8080"
+    CloudinarySettings__CloudName="dsnf8pk9i"
+    CloudinarySettings__ApiKey="676587819426664"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
