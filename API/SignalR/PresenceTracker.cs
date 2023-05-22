@@ -1,72 +1,69 @@
-namespace API.SignalR
+public class PresenceTracker
 {
-    public class PresenceTracker
+    private static readonly Dictionary<string, List<string>> OnlineUsers = 
+        new Dictionary<string, List<string>>();
+
+    public Task<bool> UserConnected(string username, string connectionId)
     {
-        private static readonly Dictionary<string, List<string>> OnlineUsers = 
-            new Dictionary<string, List<string>>();
+        bool isOnline = false;
 
-        public Task<bool> UserConnected(string username, string connectionId)
+        lock(OnlineUsers)
         {
-            bool isOnline = false;
-
-            lock(OnlineUsers)
+            if (OnlineUsers.ContainsKey(username))
             {
-                if (OnlineUsers.ContainsKey(username))
-                {
-                    OnlineUsers[username].Add(connectionId);
-                }
-                else 
-                {
-                    OnlineUsers.Add(username, new List<string>{connectionId});
-                    isOnline = true;
-                }
+                OnlineUsers[username].Add(connectionId);
             }
-
-            return Task.FromResult(isOnline);
+            else 
+            {
+                OnlineUsers.Add(username, new List<string>{connectionId});
+                isOnline = true;
+            }
         }
 
-        public Task<bool> UserDisconnected(string username, string connectionId)
+        return Task.FromResult(isOnline);
+    }
+
+    public Task<bool> UserDisconnected(string username, string connectionId)
+    {
+        bool isOffline = false;
+
+        lock(OnlineUsers)
         {
-            bool isOffline = false;
+            if (!OnlineUsers.ContainsKey(username)) return Task.FromResult(isOffline);
 
-            lock(OnlineUsers)
+            OnlineUsers[username].Remove(connectionId);
+
+            if (OnlineUsers[username].Count == 0)
             {
-                if (!OnlineUsers.ContainsKey(username)) return Task.FromResult(isOffline);
-
-                OnlineUsers[username].Remove(connectionId);
-
-                if (OnlineUsers[username].Count == 0)
-                {
-                    OnlineUsers.Remove(username);
-                    isOffline = true;
-                }
+                OnlineUsers.Remove(username);
+                isOffline = true;
             }
-
-            return Task.FromResult(isOffline);
         }
 
-        public Task<string[]> GetOnlineUsers()
+        return Task.FromResult(isOffline);
+    }
+
+    public Task<string[]> GetOnlineUsers()
+    {
+        string[] usersOnline;
+
+        lock(OnlineUsers)
         {
-            string[] usersOnline;
-
-            lock(OnlineUsers)
-            {
-                usersOnline = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
-            }
-
-            return Task.FromResult(usersOnline);
+            usersOnline = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
         }
 
-        public static Task<List<string>> GetConnectionsForUser(string username)
+        return Task.FromResult(usersOnline);
+    }
+
+    public static Task<List<string>> GetConnectionsForUser(string username)
+    {
+        List<string> conncectionIds;
+
+        lock (OnlineUsers)
         {
-            List<string> conncectionIds;
-
-            lock (OnlineUsers)
-            {
-                conncectionIds = OnlineUsers.GetValueOrDefault(username);
-            }
-
-            return Task.FromResult(conncectionIds);
+            conncectionIds = OnlineUsers.GetValueOrDefault(username);
         }
+
+        return Task.FromResult(conncectionIds);
     }
 }

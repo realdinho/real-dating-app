@@ -1,0 +1,37 @@
+// application imports
+global using API.Data;
+global using API.Entities;
+global using API.Extensions;
+global using API.Middleware;
+global using API.SignalR;
+global using API.DTOs;
+global using API.Interfaces;
+global using API.Helpers;
+global using API.Services;
+global using API.Errors;
+// Cloudinary
+global using CloudinaryDotNet;
+global using CloudinaryDotNet.Actions;
+// mapping imports 
+global using AutoMapper;
+global using AutoMapper.QueryableExtensions;
+// Microsoft imports 
+global using Microsoft.AspNetCore.SignalR;
+global using Microsoft.Extensions.Options;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.Filters;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+// System imports
+global using System.Net;
+global using System.Text;
+global using System.Text.Json;
+global using System.Security.Claims;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;
+

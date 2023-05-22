@@ -1,11 +1,3 @@
-using API.Data;
-using API.Entities;
-using API.Extensions;
-using API.Middleware;
-using API.SignalR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -63,6 +55,7 @@ app.MapHub<PresenceHub>("hubs/presence");
 app.MapHub<MessageHub>("hubs/message");
 app.MapFallbackToController("Index", "Fallback");
 
+// AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehaviour", true);
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 try
@@ -83,3 +76,4 @@ catch (Exception ex)
 }
 
 app.Run();
+// await app.RunAsync();
